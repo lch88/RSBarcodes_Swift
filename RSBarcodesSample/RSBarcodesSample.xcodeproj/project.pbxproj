@@ -230,7 +230,7 @@
 				TargetAttributes = {
 					D073990D19468EED003F0E14 = {
 						CreatedOnToolsVersion = 6.0;
-						DevelopmentTeam = M2KC4T7WDH;
+						DevelopmentTeam = 7TU46GA8U2;
 						LastSwiftMigration = 0800;
 					};
 					D073991F19468EED003F0E14 = {
@@ -448,6 +448,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 7TU46GA8U2;
 				INFOPLIST_FILE = RSBarcodesSample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -466,6 +467,7 @@
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = 7TU46GA8U2;
 				INFOPLIST_FILE = RSBarcodesSample/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 8.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

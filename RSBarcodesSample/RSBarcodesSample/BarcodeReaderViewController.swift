@@ -77,12 +77,14 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
                     self.barcode = barcode.stringValue
                     print("Barcode found: type=" + barcode.type + " value=" + barcode.stringValue)
                     self.freezeCapture()
-                    
-//                    DispatchQueue.main.async(execute: {
+
+                    DispatchQueue.main.async(execute: {
 //                        self.performSegue(withIdentifier: "nextView", sender: self)
-//                        
+                    
+                        let alertView = UIAlertView(title: "Test", message: "Test message", delegate: self, cancelButtonTitle: "OK")
+                        alertView.show()
 //                        // MARK: NOTE: Perform UI related actions here.
-//                    })
+                    })
                     
                     // MARK: NOTE: break here to only handle the first barcode object
                     break
@@ -111,5 +113,11 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
                 destinationVC.contents = self.barcode
             }
         }
+    }
+}
+
+extension BarcodeReaderViewController: UIAlertViewDelegate {
+    func alertView(_ alertView: UIAlertView, didDismissWithButtonIndex buttonIndex: Int) {
+        self.unfreezeCapture()
     }
 }

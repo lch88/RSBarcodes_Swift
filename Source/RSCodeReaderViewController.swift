@@ -438,6 +438,7 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
     
     open func unfreezeCapture() {
         freezed = false
+        self.cornersLayer.cornersArray = []
         self.session.startRunning()
     }
 }
