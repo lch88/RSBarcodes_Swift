@@ -48,6 +48,11 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
         
         self.cornersLayer.strokeColor = UIColor.yellow.cgColor
         
+        let width: CGFloat = 230
+        let midX: CGFloat = self.view.frame.midX
+        let midY: CGFloat = self.view.frame.midY
+        self.rectOfInterest = CGRect(x: midX - (width / 2), y: midY - (width / 2), width: width, height: width)
+        
         self.tapHandler = { point in
             print(point)
         }
