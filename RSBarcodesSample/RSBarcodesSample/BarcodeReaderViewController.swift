@@ -76,12 +76,13 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
                 for barcode in barcodes {
                     self.barcode = barcode.stringValue
                     print("Barcode found: type=" + barcode.type + " value=" + barcode.stringValue)
+                    self.freezeCapture()
                     
-                    DispatchQueue.main.async(execute: {
-                        self.performSegue(withIdentifier: "nextView", sender: self)
-                        
-                        // MARK: NOTE: Perform UI related actions here.
-                    })
+//                    DispatchQueue.main.async(execute: {
+//                        self.performSegue(withIdentifier: "nextView", sender: self)
+//                        
+//                        // MARK: NOTE: Perform UI related actions here.
+//                    })
                     
                     // MARK: NOTE: break here to only handle the first barcode object
                     break

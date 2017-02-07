@@ -398,16 +398,17 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
     // MARK: AVCaptureMetadataOutputObjectsDelegate
     
     open func captureOutput(_ captureOutput: AVCaptureOutput!, didOutputMetadataObjects metadataObjects: [Any]!, from connection: AVCaptureConnection!) {
+        
+        guard let videoPreviewLayer = self.videoPreviewLayer, !freezed else { return }
+        
         var barcodeObjects : Array<AVMetadataMachineReadableCodeObject> = []
         var cornersArray : Array<[Any]> = []
         for metadataObject in metadataObjects {
-            if let videoPreviewLayer = self.videoPreviewLayer {
-                if let transformedMetadataObject = videoPreviewLayer.transformedMetadataObject(for: metadataObject as! AVMetadataObject) {
-                    if transformedMetadataObject.isKind(of: AVMetadataMachineReadableCodeObject.self) {
-                        let barcodeObject = transformedMetadataObject as! AVMetadataMachineReadableCodeObject
-                        barcodeObjects.append(barcodeObject)
-                        cornersArray.append(barcodeObject.corners)
-                    }
+            if let transformedMetadataObject = videoPreviewLayer.transformedMetadataObject(for: metadataObject as! AVMetadataObject) {
+                if transformedMetadataObject.isKind(of: AVMetadataMachineReadableCodeObject.self) {
+                    let barcodeObject = transformedMetadataObject as! AVMetadataMachineReadableCodeObject
+                    barcodeObjects.append(barcodeObject)
+                    cornersArray.append(barcodeObject.corners)
                 }
             }
         }
@@ -420,11 +421,23 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
             }
         }
         
-        DispatchQueue.main.async(execute: { () -> Void in
-            if let ticker = self.ticker {
-                ticker.invalidate()
-            }
-            self.ticker = Timer.scheduledTimer(timeInterval: 0.4, target: self, selector: #selector(RSCodeReaderViewController.onTick), userInfo: nil, repeats: true)
-        })
+        if !freezed { // Do not reset corner array if freezed
+            DispatchQueue.main.async(execute: { () -> Void in
+                if let ticker = self.ticker {
+                    ticker.invalidate()
+                }
+                self.ticker = Timer.scheduledTimer(timeInterval: 0.4, target: self, selector: #selector(RSCodeReaderViewController.onTick), userInfo: nil, repeats: true)
+            })
+        }
+    }
+    
+    open func freezeCapture() {
+        freezed = true
+        self.session.stopRunning()
+    }
+    
+    open func unfreezeCapture() {
+        freezed = false
+        self.session.startRunning()
     }
 }
