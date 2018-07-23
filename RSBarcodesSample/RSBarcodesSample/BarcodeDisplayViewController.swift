@@ -20,8 +20,12 @@ class BarcodeDisplayViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         self.navigationItem.title = contents
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: false)
     }
     
     override func viewDidLayoutSubviews() {
@@ -31,7 +35,7 @@ class BarcodeDisplayViewController: UIViewController {
         gen.fillColor = UIColor.white
         gen.strokeColor = UIColor.black
         print ("generating image with barcode: " + contents)
-        if let image = gen.generateCode(contents, machineReadableCodeObjectType: AVMetadataObjectTypeQRCode) {
+        if let image = gen.generateCode(contents, machineReadableCodeObjectType: AVMetadataObject.ObjectType.qr.rawValue) {
             self.imageDisplayed.layer.borderWidth = 1
             self.imageDisplayed.image = RSAbstractCodeGenerator.resizeImage(image, targetSize: self.imageDisplayed.bounds.size, contentMode: UIViewContentMode.bottomRight)
         }

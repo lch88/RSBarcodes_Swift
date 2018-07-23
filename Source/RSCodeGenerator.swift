@@ -136,7 +136,7 @@ open class RSAbstractCodeGenerator : RSCodeGenerator {
     // RSCodeGenerator
     
     open func generateCode(_ machineReadableCodeObject:AVMetadataMachineReadableCodeObject, inputCorrectionLevel: InputCorrectionLevel) -> UIImage? {
-        return self.generateCode(machineReadableCodeObject.stringValue, inputCorrectionLevel: inputCorrectionLevel, machineReadableCodeObjectType: machineReadableCodeObject.type)
+        return self.generateCode(machineReadableCodeObject.stringValue!, inputCorrectionLevel: inputCorrectionLevel, machineReadableCodeObjectType: machineReadableCodeObject.type.rawValue)
     }
     
     open func generateCode(_ machineReadableCodeObject:AVMetadataMachineReadableCodeObject) -> UIImage? {
@@ -158,13 +158,13 @@ open class RSAbstractCodeGenerator : RSCodeGenerator {
     
     // Get CIFilter name by machine readable code object type
     open class func filterName(_ machineReadableCodeObjectType:String) -> String {
-        if machineReadableCodeObjectType == AVMetadataObjectTypeQRCode {
+        if machineReadableCodeObjectType == AVMetadataObject.ObjectType.qr.rawValue {
             return "CIQRCodeGenerator"
-        } else if machineReadableCodeObjectType == AVMetadataObjectTypePDF417Code {
+        } else if machineReadableCodeObjectType == AVMetadataObject.ObjectType.pdf417.rawValue {
             return "CIPDF417BarcodeGenerator"
-        } else if machineReadableCodeObjectType == AVMetadataObjectTypeAztecCode {
+        } else if machineReadableCodeObjectType == AVMetadataObject.ObjectType.aztec.rawValue {
             return "CIAztecCodeGenerator"
-        } else if machineReadableCodeObjectType == AVMetadataObjectTypeCode128Code {
+        } else if machineReadableCodeObjectType == AVMetadataObject.ObjectType.code128.rawValue {
             return "CICode128BarcodeGenerator"
         } else {
             return ""
@@ -183,7 +183,7 @@ open class RSAbstractCodeGenerator : RSCodeGenerator {
                 }
                 if let outputImage = filter.outputImage {
                     if let cgImage = ContextMaker.make().createCGImage(outputImage, from: outputImage.extent) {
-                        return UIImage(cgImage: cgImage, scale: 1, orientation: UIImageOrientation.up)
+                        return UIImage(cgImage: cgImage, scale: UIScreen.main.scale, orientation: .up)
                     }
                 }
             }
@@ -199,17 +199,14 @@ open class RSAbstractCodeGenerator : RSCodeGenerator {
     open class func resizeImage(_ source:UIImage, scale:CGFloat) -> UIImage? {
         let width = source.size.width * scale
         let height = source.size.height * scale
-        
-        UIGraphicsBeginImageContext(CGSize(width: width, height: height))
-        if let context = UIGraphicsGetCurrentContext() {
-            context.interpolationQuality = CGInterpolationQuality.none
-            source.draw(in: CGRect(x: 0, y: 0, width: width, height: height))
-            let target = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            return target
-        } else {
-            return nil
-        }
+
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, 0)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        context.interpolationQuality = .none
+        source.draw(in: CGRect(x: 0, y: 0, width: width, height: height))
+        let target = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return target
     }
     
     open class func resizeImage(_ source:UIImage, targetSize:CGSize, contentMode:UIViewContentMode) -> UIImage? {
@@ -263,15 +260,12 @@ open class RSAbstractCodeGenerator : RSCodeGenerator {
             }
         }
         
-        UIGraphicsBeginImageContext(targetSize)
-        if let context = UIGraphicsGetCurrentContext() {
-            context.interpolationQuality = CGInterpolationQuality.none
-            source.draw(in: CGRect(x: x, y: y, width: width, height: height))
-            let target = UIGraphicsGetImageFromCurrentImageContext()
-            UIGraphicsEndImageContext()
-            return target
-        } else {
-            return nil
-        }
+        UIGraphicsBeginImageContextWithOptions(targetSize, false, 0)
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        context.interpolationQuality = CGInterpolationQuality.none
+        source.draw(in: CGRect(x: x, y: y, width: width, height: height))
+        let target = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return target
     }
 }
