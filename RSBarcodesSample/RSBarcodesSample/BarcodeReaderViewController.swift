@@ -19,7 +19,7 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
     
     @IBAction func switchCamera(_ sender: AnyObject?) {
         let position = self.switchCamera()
-        if position == AVCaptureDevicePosition.back {
+        if position == AVCaptureDevice.Position.back {
             print("back camera.")
         } else {
             print("front camera.")
@@ -58,10 +58,10 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
         }
         
         // MARK: NOTE: If you want to detect specific barcode types, you should update the types
-        let types = NSMutableArray(array: self.output.availableMetadataObjectTypes)
+        var types = self.output.availableMetadataObjectTypes
         // MARK: NOTE: Uncomment the following line remove QRCode scanning capability
-        // types.removeObject(AVMetadataObjectTypeQRCode)
-        self.output.metadataObjectTypes = NSArray(array: types) as [AnyObject]
+        // types = types.filter({ $0 != AVMetadataObject.ObjectType.qr })
+		  self.output.metadataObjectTypes = types
         
         // MARK: NOTE: If you layout views in storyboard, you should these 3 lines
         for subview in self.view.subviews {
@@ -74,12 +74,9 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
             if !self.dispatched { // triggers for only once
                 self.dispatched = true
                 for barcode in barcodes {
-                    self.barcode = barcode.stringValue
-                    print("Barcode found: type=" + barcode.type + " value=" + barcode.stringValue)
-                    self.freezeCapture()
-
-                    DispatchQueue.main.async(execute: {
-//                        self.performSegue(withIdentifier: "nextView", sender: self)
+					guard let barcodeString = barcode.stringValue else { continue }
+                    self.barcode = barcodeString
+					print("Barcode found: type=" + barcode.type.rawValue + " value=" + barcodeString)
                     
                         let alertView = UIAlertView(title: "Test", message: "Test message", delegate: self, cancelButtonTitle: "OK")
                         alertView.show()
@@ -95,18 +92,11 @@ class BarcodeReaderViewController: RSCodeReaderViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         self.dispatched = false // reset the flag so user can do another scan
-        
         super.viewWillAppear(animated)
-        
-        if let navigationController = self.navigationController {
-            navigationController.isNavigationBarHidden = true
-        }
+        navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if let navigationController = self.navigationController {
-            navigationController.isNavigationBarHidden = false
-        }
         
         if segue.identifier == "nextView" && !self.barcode.isEmpty {
             if let destinationVC = segue.destination as? BarcodeDisplayViewController {
