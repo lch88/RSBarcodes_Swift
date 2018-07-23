@@ -15,6 +15,14 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 	@objc open var output = AVCaptureMetadataOutput()
 	@objc open var session = AVCaptureSession()
 	@objc var videoPreviewLayer: AVCaptureVideoPreviewLayer?
+    @objc var boxOverlay: CAShapeLayer?
+    
+    /// CGRect in videoPreviewLayer's coordinate
+    open var rectOfInterest: CGRect? {
+        didSet {
+            redrawRectOfInterest()
+        }
+    }
 	
 	@objc open var focusMarkLayer = RSFocusMarkLayer()
 	@objc open var cornersLayer = RSCornersLayer()
@@ -27,6 +35,7 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 	@objc open var isCrazyMode = false
 	@objc var isCrazyModeStarted = false
 	@objc var lensPosition: Float = 0
+    @objc var freezed: Bool = false
 	
 	fileprivate struct Platform {
 		static let isSimulator: Bool = {
@@ -193,6 +202,27 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 		
 		reloadVideoOrientation()
 	}
+    
+    @objc func redrawRectOfInterest() {
+        guard let videoPreviewLayer = self.videoPreviewLayer, let previewRect = self.rectOfInterest else { return }
+        
+        // Setup rect of interest
+        let metadataRect = videoPreviewLayer.metadataOutputRectConverted(fromLayerRect: previewRect)
+        self.output.rectOfInterest = metadataRect
+        
+        // Setup rect of interest box overlay
+        boxOverlay?.removeFromSuperlayer() // remove old one if exists
+        let overlay = CAShapeLayer()
+        overlay.backgroundColor = UIColor.clear.cgColor
+        overlay.fillColor = UIColor.clear.cgColor
+        overlay.strokeColor = UIColor.white.cgColor
+        overlay.lineWidth = 3
+        overlay.lineDashPattern = [7.0, 7.0]
+        overlay.lineDashPhase = 0
+        overlay.path = UIBezierPath(roundedRect: previewRect, cornerRadius: 8).cgPath
+        boxOverlay = overlay
+        self.view.layer.insertSublayer(overlay, above: videoPreviewLayer)
+    }
 	
 	@objc class func interfaceOrientationToVideoOrientation(_ orientation : UIInterfaceOrientation) -> AVCaptureVideoOrientation {
 		switch (orientation) {
@@ -335,6 +365,8 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 		self.videoPreviewLayer?.frame = frame
 		self.focusMarkLayer.frame = frame
 		self.cornersLayer.frame = frame
+        
+        redrawRectOfInterest()
 	}
 	
 	override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -387,6 +419,9 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 	// MARK: AVCaptureMetadataOutputObjectsDelegate
 
 	public func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+        
+        guard !freezed else { return }
+        
 		var barcodeObjects : Array<AVMetadataMachineReadableCodeObject> = []
 		var cornersArray : Array<[Any]> = []
 		for metadataObject in metadataObjects {
@@ -416,4 +451,19 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 			self.ticker = Timer.scheduledTimer(timeInterval: 0.4, target: self, selector: #selector(RSCodeReaderViewController.onTick), userInfo: nil, repeats: true)
 		})
 	}
+    
+    @objc open func freezeCapture() {
+        guard !freezed else { return }
+        
+        freezed = true
+        self.session.stopRunning()
+    }
+
+    @objc open func unfreezeCapture() {
+        guard freezed else { return }
+        
+        freezed = false
+        self.cornersLayer.cornersArray = []
+        self.session.startRunning()
+    }
 }
