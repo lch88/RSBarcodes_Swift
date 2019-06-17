@@ -82,7 +82,8 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 			return .unspecified
 		}
 	}
-	
+
+    @discardableResult
 	@objc open func toggleTorch() -> Bool {
 		if self.hasTorch() {
 			self.session.beginConfiguration()
@@ -236,7 +237,9 @@ open class RSCodeReaderViewController: UIViewController, AVCaptureMetadataOutput
 			return AVCaptureVideoOrientation.landscapeLeft
 		case .landscapeRight:
 			return AVCaptureVideoOrientation.landscapeRight
-		}
+        @unknown default:
+            return AVCaptureVideoOrientation.portrait
+        }
 	}
 	
 	@objc func reloadVideoOrientation() {
